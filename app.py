@@ -1,3 +1,4 @@
+from main import iniciar_app
 
-import main
-main.executar()
+if __name__ == "__main__":
+    iniciar_app()

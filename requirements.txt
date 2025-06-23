@@ -1,2 +1,2 @@
-streamlit
-websocket-client
+streamlit==1.26.0
+websocket-client==1.8.0

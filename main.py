@@ -1,25 +1,28 @@
-
 import streamlit as st
 from deriv_ws import iniciar_conexao
+from estrategias.predador_de_padroes import estrategia_predador
 
-def executar():
-    st.set_page_config(page_title="LastChance Predador", layout="centered")
-    st.title("🎯 Robô Predador Deriv")
+log_box = None
 
-    st.markdown("## Configurações do Robô")
+def atualizar_interface(msg):
+    global log_box
+    if log_box:
+        log_box.markdown(f"```text\n{msg}\n```")
 
-    token = st.text_input("🔑 Token da API da Deriv", type="password")
-    stake = st.number_input("💰 Stake Inicial", min_value=0.35, value=1.00, step=0.01)
-    fator_martingale = st.number_input("📈 Fator Martingale", min_value=1.0, value=2.0, step=0.1)
-    stop_gain = st.number_input("🏁 Stop Gain", min_value=1.0, value=10.0, step=0.5)
-    stop_loss = st.number_input("⛔ Stop Loss", min_value=1.0, value=10.0, step=0.5)
+def iniciar_app():
+    global log_box
+    st.set_page_config(page_title="Robô Deriv - Predador", layout="centered")
+    st.title("🤖 Robô Deriv - Estratégia Predador de Padrões")
 
-    estrategia = st.selectbox("📊 Estratégia", ["Predador de Padrões"])
-    log = st.empty()
+    st.subheader("Configurações do Robô")
+    token = st.text_input("Token da API da Deriv", type="password")
+    stake = st.number_input("Stake Inicial", min_value=0.35, value=1.00, step=0.10)
+    fator_martingale = st.number_input("Fator Martingale", min_value=1.0, value=2.0, step=0.1)
+    stop_loss = st.number_input("Limite de Perda (Loss)", min_value=1.0, value=10.0, step=0.5)
+    stop_gain = st.number_input("Limite de Lucro (Gain)", min_value=1.0, value=20.0, step=0.5)
+    usar_martingale = st.checkbox("Usar Martingale", value=True)
 
     if st.button("🚀 Iniciar Robô"):
-        if not token:
-            st.warning("Por favor, insira o token da API.")
-        else:
-            st.success("Iniciando conexão com a Deriv...")
-            iniciar_conexao(token, stake, fator_martingale, stop_gain, stop_loss, estrategia, log)
+        log_box = st.empty()
+        atualizar_interface("🔌 Iniciando conexão com a Deriv...")
+        iniciar_conexao(token, estrategia_predador, stake, fator_martingale, stop_loss, stop_gain, usar_martingale, atualizar_interface)
