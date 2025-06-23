@@ -1,27 +1,36 @@
-import websocket
+
 import threading
+import websocket
 import json
-from estrategias import predador_de_padroes
 
-def iniciar_conexao(token, stake, stop_gain, stop_loss, martingale, fator_marti, estrategia_nome, atualizar_interface):
+def iniciar_conexao(token, stake, fator_martingale, stop_gain, stop_loss, estrategia, log_box):
+    def atualizar_interface(msg):
+        if log_box:
+            log_box.markdown(f"```text\n{msg}\n```")
+
     def on_open(ws):
-        ws.send(json.dumps({"authorize": token}))
         atualizar_interface("✅ Conexão estabelecida com a Deriv!")
+        auth = {
+            "authorize": token
+        }
+        ws.send(json.dumps(auth))
 
-        if estrategia_nome == "predador_de_padroes":
-            predador_de_padroes(ws, stake, stop_gain, stop_loss, martingale, fator_marti, atualizar_interface)
+    def on_message(ws, message):
+        atualizar_interface("📩 Mensagem recebida: " + message)
 
     def on_error(ws, error):
         atualizar_interface(f"❌ Erro: {error}")
 
-    def on_close(ws, close_status_code, close_msg):
+    def on_close(ws, *args):
         atualizar_interface("🔌 Conexão encerrada.")
 
     ws_app = websocket.WebSocketApp(
-        "wss://ws.derivws.com/websockets/v3?app_id=1089",
+        "wss://ws.derivws.com/websockets/v3",
         on_open=on_open,
+        on_message=on_message,
         on_error=on_error,
-        on_close=on_close,
+        on_close=on_close
     )
+
     thread = threading.Thread(target=ws_app.run_forever)
     thread.start()

@@ -1,29 +1,25 @@
+
 import streamlit as st
 from deriv_ws import iniciar_conexao
-from estrategias import predador_de_padroes
 
-log_box = None
+def executar():
+    st.set_page_config(page_title="LastChance Predador", layout="centered")
+    st.title("🎯 Robô Predador Deriv")
 
-def atualizar_interface(msg):
-    global log_box
-    if log_box:
-        log_box.markdown(f"```text\n{msg}\n```")
+    st.markdown("## Configurações do Robô")
 
-def run():
-    st.set_page_config(page_title="Robô Deriv - Predador", layout="centered")
-    st.title("🤖 Robô Deriv - Predador de Padrões")
+    token = st.text_input("🔑 Token da API da Deriv", type="password")
+    stake = st.number_input("💰 Stake Inicial", min_value=0.35, value=1.00, step=0.01)
+    fator_martingale = st.number_input("📈 Fator Martingale", min_value=1.0, value=2.0, step=0.1)
+    stop_gain = st.number_input("🏁 Stop Gain", min_value=1.0, value=10.0, step=0.5)
+    stop_loss = st.number_input("⛔ Stop Loss", min_value=1.0, value=10.0, step=0.5)
 
-    global log_box
+    estrategia = st.selectbox("📊 Estratégia", ["Predador de Padrões"])
+    log = st.empty()
 
-    token = st.text_input("🎯 Token da API da Deriv", type="password")
-    stake = st.number_input("💰 Stake Inicial", value=1.0)
-    stop_gain = st.number_input("🟢 Stop Gain", value=10.0)
-    stop_loss = st.number_input("🔴 Stop Loss", value=10.0)
-    martingale = st.checkbox("🎲 Ativar Martingale", value=True)
-    fator_marti = st.number_input("📈 Fator Martingale", value=2.0)
-    estrategia = st.selectbox("📊 Estratégia", ["predador_de_padroes"])
-
-    log_box = st.empty()
     if st.button("🚀 Iniciar Robô"):
-        atualizar_interface("⏳ Iniciando conexão com a Deriv...")
-        iniciar_conexao(token, stake, stop_gain, stop_loss, martingale, fator_marti, estrategia, atualizar_interface)
+        if not token:
+            st.warning("Por favor, insira o token da API.")
+        else:
+            st.success("Iniciando conexão com a Deriv...")
+            iniciar_conexao(token, stake, fator_martingale, stop_gain, stop_loss, estrategia, log)
