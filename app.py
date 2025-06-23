@@ -1,2 +1,2 @@
-from main import iniciar_app
-iniciar_app()
+import main
+main.run()
